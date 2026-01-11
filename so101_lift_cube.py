@@ -375,12 +375,11 @@ class PickCubeSO101Env(BaseEnv):
                     robot_name: init_qpos 
                     for robot_name, _ in self.agent.agents_dict.items()
                 }
-                self.agent.reset(init_qpos_dict)
-                # self.agent.reset({
-                #     "so101-0": init_qpos,
-                #     "so101-1": init_qpos,
-                # })
-                # print(f"Initialize multiagent of {env_idx}")
+                for uid, ag in self.agent.agents_dict.items():
+                    if init_qpos_dict is not None and uid in init_qpos_dict:
+                        ag.reset(init_qpos_dict[uid])
+                    else:
+                        ag.reset()
             else:
                 self.agent.reset(init_qpos)
 

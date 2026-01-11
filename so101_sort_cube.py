@@ -25,16 +25,12 @@ from mani_skill.agents.base_agent import BaseAgent, Keyframe
 from mani_skill.agents.controllers import *
 from mani_skill.agents.registration import register_agent
 
-from utils.distort import get_distorted_image_tensor
-
 from mani_skill.sensors.camera import (
     Camera,
     CameraConfig,
     parse_camera_configs,
     update_camera_configs_from_dict,
 )
-
-import constants as C
 
 from transforms3d.euler import euler2quat
 

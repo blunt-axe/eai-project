@@ -32,8 +32,6 @@ from mani_skill.sensors.camera import (
     update_camera_configs_from_dict,
 )
 
-import constants as C
-
 from transforms3d.euler import euler2quat
 
 from so101_lift_cube import PickCubeSO101Env
