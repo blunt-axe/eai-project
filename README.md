@@ -1,9 +1,9 @@
-# eai project
+# EAI Project
 
 ## Install
 
 1. Execute `pip install -e ./ManiSkill`
-2. Install Vulkan, refer to https://autodl.com/docs/vulkan/
+2. Install Vulkan, refer to https://autodl.com/docs/vulkan/ if using AutoDL.
 
 ## Experiments
 
@@ -36,3 +36,32 @@ Modify line 200 in `so101_arrange_eval.py` with `high=6` to test random initial 
 ------------
 
 Modify `import so101_arrange_eval` to `import so101_arrange_color` and `env_id: str = "ArrangeCubeSO101Eval-v0"` to `env_id: str = "ArrangeCubeSO101Color-v0"` in `eval_arrange.py`, to test the generalization of the task with different colors.
+
+## Task Difficulty
+
+The self-defined task, Arrange, introduces several sources of difficulty:
+
++ Long horizon: The task contains multiple substeps of lifting and placing cubes. Our methodrequires 75 seconds in average if the given permutation is random, with a maximum of 150seconds to finish the task in simulation time.
+
++ Dual arm:  Both arms occupy overlapping spatial regions, and can not reach the regionfurthest from them. (For the example in the figure, the left arm can not reach the blue cube.)So two-arm coordination is required for this task.
+
++ Instruction-related: The task requires an input as the instruction, which is the desired finalconfiguration for the robot to execute
+
+
+## Note on Code Structures
+
+### Environments
+
++ Environments of benchmark tasks are in `so101_lift_cube.py`, `so101_stack_cube.py` and `so101_sort_cube.py`.
+
++ The file `so101_lift_cube_v2.py` is only for the `so101_arrange` family to inhere from.
+
++ `so101_arrange.py`, `so101_arrange_secondary.py` are for training, while `so101_arrange_eval.py` and `so101_arrange_color.py` are for evaluation.
+
+### Training
+
+You can use `*_ppo.py` for training. The code is modified from `ppo_rgb.py` in examples of ManiSkill, adding a bag of tricks including tanh squashing, state running average and std normalization, and LayerNorm before rgb last feature output.
+
+### Control
+
+Inside `grasp_cube/agents/robots/so101` there are `so_101_ee.py` and `so_101_ee_new_rest_qpos.py` for end-effector control and different rest positions.
