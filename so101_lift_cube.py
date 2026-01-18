@@ -35,8 +35,6 @@ from utils.builder import (
     build_box_w_friction,
 )
 
-import constants as C
-
 @register_env("PickCubeSO101-v0", max_episode_steps=100)
 class PickCubeSO101Env(BaseEnv):
     
@@ -445,7 +443,7 @@ class PickCubeSO101Env(BaseEnv):
         # is_inside = (torch.abs(red_cube_x - 0.472) <= 0.2) & (torch.abs(red_cube_y - 0.26) <= 0.2)
 
         # 是否举起
-        is_lifted = red_cube_z > C.REQUIRED_HEIGHT
+        is_lifted = red_cube_z > 0.06
 
         is_inside = torch.linalg.norm(self.red_cube.pose.p - self.goal_pos, axis=1) < 0.050
 
@@ -453,7 +451,7 @@ class PickCubeSO101Env(BaseEnv):
         is_grasping = self.agent.is_grasping(self.red_cube)
 
         # 是否慢
-        is_slow = vel < C.SPEED_LIMIT       
+        is_slow = vel < 0.20   
 
         return {
             "is_inside": is_inside,

@@ -90,7 +90,7 @@ class FlattenStateDictWrapper(gym.ObservationWrapper):
 # =============================================================================
 @dataclass
 class Args:
-    exp_name: Optional[str] = 'SortCubeInit'
+    exp_name: Optional[str] = 'SortCubePhase2Cam'
     """the name of this experiment"""
     seed: int = 1
     """seed of the experiment"""
@@ -112,17 +112,17 @@ class Args:
     """whether to save model into the `runs/{run_name}` folder"""
     evaluate: bool = False
     """if toggled, only runs evaluation with the given model checkpoint and saves the evaluation trajectories"""
-    checkpoint: Optional[str] = None
+    checkpoint: Optional[str] = None # "runs/SortCubePhase2_tmp/ckpt_21.pt" # "runs/SortCubePhase1/ckpt_106.pt"
     """path to a pretrained checkpoint file to start evaluation/training from"""
     render_mode: str = "sensors"
     """the environment rendering mode"""
 
     # Algorithm specific arguments
-    env_id: str = "SortCubeSO101-v0"
+    env_id: str = "SortCubeSO101-v1" # modify
     """the id of the environment"""
     include_state: bool = True
     """whether to include state information in observations"""
-    obs_mode: str = 'rgb+state'
+    obs_mode: str = 'rgb'
     """whether to include privileged states, if yes use 'rgb+state'"""
     total_timesteps: int = 30000000
     """total timesteps of the experiments"""
