@@ -1,0 +1,11 @@
+{
+  "output_dir": "./trajectories/lift",
+  "total_episodes": 120,
+  "successful_episodes": 98,
+  "generated_files": {
+    "h5_count": 1,
+    "json_count": 1,
+    "mp4_count": 10
+  },
+  "success_rate": 81.7
+}

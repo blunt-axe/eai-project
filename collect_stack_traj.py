@@ -27,12 +27,11 @@ class CollectArgs:
 	"""环境ID"""
 	num_envs: int = 12
 	"""并行环境数量"""
-	# num_episodes: int = 240
-	num_episodes: int = 60
+	num_episodes: int = 120
 	"""收集的episode数量"""
 	max_steps_per_episode: int = 200
 	"""每个episode的最大步数"""
-	output_dir: str = "./collected_trajectories/Tmp"
+	output_dir: str = "./trajectories/stack"
 	"""输出目录"""
 	seed: int = 42
 	"""随机种子"""
@@ -137,7 +136,7 @@ class SimpleTrajectoryCollector:
 		self.envs = ManiSkillVectorEnv(
 			env, 
 			self.args.num_envs, 
-			ignore_terminations=False,  # partial resets, if True there is problem
+			ignore_terminations=True,  # partial resets, if True there is problem
 			record_metrics=True,
 		)
 		# ======================================================
@@ -196,39 +195,23 @@ class SimpleTrajectoryCollector:
 			# 执行动作（RecordEpisode会在内部记录轨迹）
 			next_obs, rewards, terminations, truncations, infos = self.envs.step(actions)
 
-			# print(f'reward mean {rewards.mean()}')
-
-			# 检查是否结束
 			new_dones = torch.logical_or(terminations, truncations)
 
-			# 处理结束的episode（更新统计信息）
-			for env_idx in range(self.args.num_envs):
-				if new_dones[env_idx] and not dones[env_idx]:
-					collected_episodes += 1
-					
-					# 获取episode信息
-					success = terminations[env_idx]
-					if success:
-						self.stats['successful_episodes'] += 1
-					
-					print(f"Episode {collected_episodes}/{self.args.num_episodes} completed")
-					print(f"  Success: {success}")
-					
-					# RecordEpisode会自动保存轨迹和视频到文件
-			
-			# 更新观察
-			obs = next_obs
-			dones = dones | new_dones
-			
-			step_count += 1
-			
-			# 如果所有环境都结束了，重置
-			if dones.all():
+			if new_dones.all():
+				print(f"success={last_success}")
+				self.stats['successful_episodes'] += last_success.sum().item()
+				collected_episodes += new_dones.sum().item()
+				
 				if collected_episodes < self.args.num_episodes:
 					obs, _ = self.envs.reset()
-					dones = torch.zeros(self.args.num_envs, dtype=torch.bool, device=self.device)
 				else:
 					break
+			else:
+				last_success = infos["success"]
+			
+			obs = next_obs
+			
+			step_count += 1
 		
 		# 强制保存剩余的数据
 		self._force_save()
@@ -255,45 +238,64 @@ class SimpleTrajectoryCollector:
 			pass
 	
 	def print_summary(self):
-		"""打印收集摘要"""
-		print(f"\n{'='*60}")
-		print("TRAJECTORY COLLECTION SUMMARY")
-		print(f"{'='*60}")
-		print(f"Output directory: {self.args.output_dir}")
-		
-		# 列出生成的文件
-		if os.path.exists(self.args.output_dir):
-			files = os.listdir(self.args.output_dir)
-			h5_files = [f for f in files if f.endswith('.h5')]
-			json_files = [f for f in files if f.endswith('.json')]
-			mp4_files = [f for f in files if f.endswith('.mp4')]
-			
-			print(f"\nGenerated files:")
-			print(f"  Trajectory data: {len(h5_files)} .h5 file(s)")
-			print(f"  Metadata: {len(json_files)} .json file(s)")
-			print(f"  Videos: {len(mp4_files)} .mp4 file(s)")
-			
-			if h5_files:
-				print(f"\nTrajectory files:")
-				for f in h5_files[:5]:  # 显示前5个文件
-					print(f"  - {f}")
-				if len(h5_files) > 5:
-					print(f"  ... and {len(h5_files) - 5} more")
-			
-			if mp4_files:
-				print(f"\nVideo files:")
-				for f in mp4_files[:5]:  # 显示前5个文件
-					print(f"  - {f}")
-				if len(mp4_files) > 5:
-					print(f"  ... and {len(mp4_files) - 5} more")
-		
-		print(f"\nCollection statistics:")
-		print(f"  Total episodes: {self.stats['total_episodes']}")
-		print(f"  Successful episodes: {self.stats['successful_episodes']}")
-		if self.stats['total_episodes'] > 0:
-			success_rate = self.stats['successful_episodes'] / self.stats['total_episodes'] * 100
-			print(f"  Success rate: {success_rate:.1f}%")
-		print(f"{'='*60}")
+	    print(f"\n{'='*60}")
+	    print("TRAJECTORY COLLECTION SUMMARY")
+	    print(f"{'='*60}")
+	    print(f"Output directory: {self.args.output_dir}")
+	    
+	    if os.path.exists(self.args.output_dir):
+	        files = os.listdir(self.args.output_dir)
+	        h5_files = [f for f in files if f.endswith('.h5')]
+	        json_files = [f for f in files if f.endswith('.json')]
+	        mp4_files = [f for f in files if f.endswith('.mp4')]
+	        
+	        print(f"\nGenerated files:")
+	        print(f"  Trajectory data: {len(h5_files)} .h5 file(s)")
+	        print(f"  Metadata: {len(json_files)} .json file(s)")
+	        print(f"  Videos: {len(mp4_files)} .mp4 file(s)")
+	        
+	        if h5_files:
+	            print(f"\nTrajectory files:")
+	            for f in h5_files[:5]:
+	                print(f"  - {f}")
+	            if len(h5_files) > 5:
+	                print(f"  ... and {len(h5_files) - 5} more")
+	        
+	        if mp4_files:
+	            print(f"\nVideo files:")
+	            for f in mp4_files[:5]:
+	                print(f"  - {f}")
+	            if len(mp4_files) > 5:
+	                print(f"  ... and {len(mp4_files) - 5} more")
+	    
+	    print(f"\nCollection statistics:")
+	    print(f"  Total episodes: {self.stats['total_episodes']}")
+	    print(f"  Successful episodes: {self.stats['successful_episodes']}")
+	    if self.stats['total_episodes'] > 0:
+	        success_rate = self.stats['successful_episodes'] / self.stats['total_episodes'] * 100
+	        print(f"  Success rate: {success_rate:.1f}%")
+	    
+	    summary_dict = {
+	        "output_dir": self.args.output_dir,
+	        "total_episodes": self.stats['total_episodes'],
+	        "successful_episodes": self.stats['successful_episodes'],
+	        "generated_files": {
+	            "h5_count": len(h5_files),
+	            "json_count": len(json_files),
+	            "mp4_count": len(mp4_files)
+	        }
+	    }
+	    
+	    if self.stats['total_episodes'] > 0:
+	        summary_dict["success_rate"] = float(f"{success_rate:.1f}")
+	    
+	    summary_path = os.path.join(self.args.output_dir, "summary.json")
+	    with open(summary_path, 'w', encoding='utf-8') as f:
+	        import json
+	        json.dump(summary_dict, f, indent=2, ensure_ascii=False)
+	    
+	    print(f"  Summary saved to: {summary_path}")
+	    print(f"{'='*60}")
 
 def main():
 	"""主函数"""
