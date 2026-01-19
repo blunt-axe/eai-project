@@ -21,34 +21,8 @@ The trajectories are stored in [THU cloud disk](https://cloud.tsinghua.edu.cn/f/
 
 Some testing videos of evaluation are in the `videos` folder.
 
-## Arrange Evaluating
 
-For the default environment `eval_arrange.py`, initialized cube colors are `R G B` in order, and your input is the desired final order.
-
---------------
-
-```python
-self.cube_perm_idx[env_idx] = torch.randint(low=0, high=1, size=(b,), device=device) # Change to 6 if random initial color permutation
-```
-
-Modify line 200 in `so101_arrange_eval.py` with `high=6` to test random initial state. (Note that for easier controlling parallel environments, the sequence of swaps are still designed for `RGB->Input`, same for the following)
-
-------------
-
-Modify `import so101_arrange_eval` to `import so101_arrange_color` and `env_id: str = "ArrangeCubeSO101Eval-v0"` to `env_id: str = "ArrangeCubeSO101Color-v0"` in `eval_arrange.py`, to test the generalization of the task with different colors.
-
-## Task Difficulty
-
-The self-defined task, Arrange, introduces several sources of difficulty:
-
-+ Long horizon: The task contains multiple substeps of lifting and placing cubes. Our methodrequires 75 seconds in average if the given permutation is random, with a maximum of 150seconds to finish the task in simulation time.
-
-+ Dual arm:  Both arms occupy overlapping spatial regions, and can not reach the regionfurthest from them. (For the example in the figure, the left arm can not reach the blue cube.)So two-arm coordination is required for this task.
-
-+ Instruction-related: The task requires an input as the instruction, which is the desired finalconfiguration for the robot to execute
-
-
-## Note on Code Structures
+## Code Structures
 
 ### Environments
 
@@ -65,3 +39,30 @@ You can use `*_ppo.py` for training. The code is modified from `ppo_rgb.py` in e
 ### Control
 
 Inside `grasp_cube/agents/robots/so101` there are `so_101_ee.py` and `so_101_ee_new_rest_qpos.py` for end-effector control and different rest positions.
+
+## Evaluating for task Arrange
+
+For the default environment `eval_arrange.py`, initialized cube colors are `R G B` in order, and your input is the desired final order.
+
+--------------
+
+```python
+self.cube_perm_idx[env_idx] = torch.randint(low=0, high=1, size=(b,), device=device) # Change to 6 if random initial color permutation
+```
+
+Modify line 200 in `so101_arrange_eval.py` with `high=6` to test random initial state. (Note that for easier controlling parallel environments, the sequence of swaps are still designed for `RGB->Input`, same for the following)
+
+------------
+
+Modify `import so101_arrange_eval` to `import so101_arrange_color` and `env_id: str = "ArrangeCubeSO101Eval-v0"` to `env_id: str = "ArrangeCubeSO101Color-v0"` in `eval_arrange.py`, to test the generalization of the task with different colors.
+
+### Task Difficulty
+
+The self-defined task, Arrange, introduces several sources of difficulty:
+
++ Long horizon: The task contains multiple substeps of lifting and placing cubes. Our methodrequires 75 seconds in average if the given permutation is random, with a maximum of 150seconds to finish the task in simulation time.
+
++ Dual arm:  Both arms occupy overlapping spatial regions, and can not reach the regionfurthest from them. (For the example in the figure, the left arm can not reach the blue cube.)So two-arm coordination is required for this task.
+
++ Instruction-related: The task requires an input as the instruction, which is the desired finalconfiguration for the robot to execute
+
