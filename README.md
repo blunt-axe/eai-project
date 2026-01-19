@@ -14,6 +14,9 @@ Below are the success rates of each benchmark task in **simulation**:
 | Lift  | $81.7\%$     |
 | Stack | $66.7\%$     |
 | Sort  | $79\%$       |
+| Arrange (Random instruction) | $83.3\%$       |
+
+See more details in the report.
 
 The trajectories are stored in [THU cloud disk](https://cloud.tsinghua.edu.cn/f/34bfd5308045438094a0/). All trajectories are collected **without privileged information**, which is implemented by setting `obs_mode=rgb` so that `obs_mode_struct.use_state=False` in the ManiSkill environments.
 
