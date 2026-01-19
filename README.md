@@ -56,7 +56,7 @@ Modify line 200 in `so101_arrange_eval.py` with `high=6` to test random initial 
 
 Modify `import so101_arrange_eval` to `import so101_arrange_color` and `env_id: str = "ArrangeCubeSO101Eval-v0"` to `env_id: str = "ArrangeCubeSO101Color-v0"` in `eval_arrange.py`, to test the generalization of the task with different colors.
 
-### Task Difficulty
+### Task and Methodology Highlights
 
 The self-defined task, Arrange, introduces several sources of difficulty:
 
@@ -64,5 +64,7 @@ The self-defined task, Arrange, introduces several sources of difficulty:
 
 + Dual arm:  Both arms occupy overlapping spatial regions, and can not reach the regionfurthest from them. (For the example in the figure, the left arm can not reach the blue cube.)So two-arm coordination is required for this task.
 
-+ Instruction-related: The task requires an input as the instruction, which is the desired finalconfiguration for the robot to execute
++ Instruction-related: The task requires an input as the instruction, which is the desired finalconfiguration for the robot to execute.
+
++ Generalization: Our method can be generalized to the task with different color of cubes. (See `arrange_different_color.mp4` in `videos`)
 
